@@ -27,17 +27,19 @@ x_a(61,:) = [0 0];
 x = [-0.5:0.01:0.5];
 [x,y] = meshgrid(x);
 for ii = 1:length(x(:))
-    x_p(ii,:) = [x(ii),y(ii)]; %nodal positions
+    x_p(ii,:) = [x(ii),y(ii)]; %mp positions
 end
 
-plot(x_a(:,1),x_a(:,2),'ro'); hold on;
-plot(x_p(:,1),x_p(:,2),'bx');
+%% Data from LAMMPS
+LME_Tests_LAMMPS_data;
+
+%%
 
 ITER_MAX = 100; % Maximum Newton-Raphson's to do before giving up
 N_mp = size(x_p,1);
 dim = 2;
-beta = 4.0/h^2;
-R_cutoff = sqrt(-log(10^-12)./beta);
+beta = gamma/h^2;
+R_cutoff = sqrt(-log(10^-16)./beta);
 
 % Cutoff and neighbour search
 NeighNodes = rangesearch(x_a,x_p,R_cutoff); 
@@ -95,38 +97,34 @@ for mp = 1:N_mp
     Shape(mp).gradp = LME_Reg_Grad(X,X_a,p,Hinv,h,dim); % May need adjustment near discontinuities
 end
     
+%%
+% test = 61; %Node to test (right in the center)
+% numneigh = 0;
+% neigh = zeros(size(x_p,1),1);
+% index = zeros(size(x_p,1),1);
+% for ii = 1:size(x_p,1)
+%     for jj = 1:Shape(ii).numneigh
+%         if Shape(ii).neigh(jj) == test
+%             numneigh = numneigh + 1;
+%             neigh(numneigh) = ii;
+%             index(numneigh) = jj;
+%             p(numneigh) = Shape(ii).p(jj);
+%             gradp(numneigh,:) = Shape(ii).gradp(jj,:);
+%         end
+% 
+%     end
+% end
+% figure;
+% plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),p,'bo','MarkerSize',1);
+% xlabel('x'),ylabel('y');zlabel('z');title("P");
+% figure;
+% plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),gradp(:,1),'bo','MarkerSize',1);
+% xlabel('x'),ylabel('y');zlabel('z');title("dP/dx");
+% figure;
+% plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),gradp(:,2),'bo','MarkerSize',1);
+% xlabel('x'),ylabel('y');zlabel('z');title("dP/dy");
 
-test = 61; %Node to test (right in the center)
-numneigh = 0;
-neigh = zeros(size(x_p,1),1);
-index = zeros(size(x_p,1),1);
-for ii = 1:size(x_p,1)
-    for jj = 1:Shape(ii).numneigh
-        if Shape(ii).neigh(jj) == test
-            numneigh = numneigh + 1;
-            neigh(numneigh) = ii;
-            index(numneigh) = jj;
-            p(numneigh) = Shape(ii).p(jj);
-            gradp(numneigh,:) = Shape(ii).gradp(jj,:);
-        end
-
-    end
-end
-figure;
-plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),p,'bo','MarkerSize',1);
-xlabel('x'),ylabel('y');zlabel('z');title("P");
-figure;
-plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),gradp(:,1),'bo','MarkerSize',1);
-xlabel('x'),ylabel('y');zlabel('z');title("dP/dx");
-figure;
-plot3(x(neigh(1:numneigh)),y(neigh(1:numneigh)),gradp(:,2),'bo','MarkerSize',1);
-xlabel('x'),ylabel('y');zlabel('z');title("dP/dy");
-
-
-
-
-
-
+%%
 
 %%%%%%% Minor Functions %%%%%%%
 

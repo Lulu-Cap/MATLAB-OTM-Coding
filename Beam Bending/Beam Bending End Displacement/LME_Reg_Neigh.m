@@ -83,14 +83,14 @@ end
 
 %%%%%%% Minor Functions %%%%%%%
 
-function grad_p = LME_Reg_Grad(x,xa,p,H,h,dim)
+function grad_p = LME_Reg_Grad(x,xa,p,Hinv,h,dim)
 % Computes the spatial gradient of shape functions around a material point
 %   x: mp location to evaluate at [1 x dim]
 %   xa: locations of all nodes w/in neighbourhood [N_h x dim]
 %   Shape: Structure containing shape function and neighbour info for this
 %           mp
 %   p: Shape function evaluations for each neighbour node [N_h x 1]
-%   H: Inverse of Hessian matrix [dim x dim]
+%   Hinv: Inverse of Hessian matrix [dim x dim]
 %   dim: dimension of problem
 
     %grad_beta = 0; K_a = 0; % Ignoring the gradient of beta for now. Keep it constant for simplicity
@@ -98,7 +98,7 @@ function grad_p = LME_Reg_Grad(x,xa,p,H,h,dim)
     
     grad_p = zeros(NumNeigh,dim);
     for nd = 1:NumNeigh
-        grad_p(nd,:) = -p(nd)*H*(x-xa(nd,:))'/h^2; %+ p(nd)*K_a*grad_beta; % This term has been temporarily ignored
+        grad_p(nd,:) = -p(nd)*Hinv*(x-xa(nd,:))'/h^2; %+ p(nd)*K_a*grad_beta; % This term has been temporarily ignored
     end
     
 end
@@ -141,8 +141,8 @@ function invH = inv_Hessian(H,dim)
         invH = 1/H; % inverse of 1D matrix
     elseif dim ==2
         invH = [H(2,2), -H(1,2); ...
-            -H(2,1), H(1,1)] ...
-            /(H(1,1)*H(2,2)-H(1,2)*H(2,1)); % Explicit inversion for 2D
+               -H(2,1), H(1,1)] ...
+               /(H(1,1)*H(2,2)-H(1,2)*H(2,1)); % Explicit inversion for 2D
     elseif dim == 3
         invH = inv3x3(H); % Explicit inversion for 3D
     else
